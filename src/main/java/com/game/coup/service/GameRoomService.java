@@ -26,7 +26,7 @@ public class GameRoomService {
 
     private List<Integer> newCardDeck() {
         List<Integer> cardDeck = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
+        for (Integer i = 1; i <= 5; i++) {
             for (int k = 0; k < 4; k++) {
                 cardDeck.add(i);
             }
@@ -35,14 +35,21 @@ public class GameRoomService {
         return cardDeck;
     }
 
-    public void joinRoom(String gameRoomId, String playerId, String playerName) {
-        @SuppressWarnings("unchecked")
-        Map<String, Map<String, Object>> playerMap = (Map<String, Map<String, Object>>) this.gameRooms.get(gameRoomId).get("players");
+    private Map<String, Object> initializePlayerAttributes(String playerName) {
         Map<String, Object> playerAttributeMap = new HashMap<>();
         playerAttributeMap.put("name", playerName);
         playerAttributeMap.put("coins", 0);
         playerAttributeMap.put("cards", new ArrayList<Integer>());
-        playerMap.put(playerId, playerAttributeMap);
+        playerAttributeMap.put("lives", 2);
+        return playerAttributeMap;
+    }
+
+    public String joinRoom(String gameRoomId, String playerName) {
+        @SuppressWarnings("unchecked")
+        Map<String, Map<String, Object>> playerMap = (Map<String, Map<String, Object>>) this.gameRooms.get(gameRoomId).get("players");
+        String playerId = RandomString.getRandomString();
+        playerMap.put(playerId, this.initializePlayerAttributes(playerName));
+        return playerId;
     }
 
     @SuppressWarnings("unchecked")
@@ -51,7 +58,7 @@ public class GameRoomService {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Integer> takeCards(String gameRoomId, String playerId, int numCards) {
+    public List<Integer> takeCards(String gameRoomId, String playerId, Integer numCards) {
         Map<String, Object> gameRoom = this.gameRooms.get(gameRoomId);
         List<Integer> cardDeck = (List<Integer>) gameRoom.get("cardDeck");
         List<Integer> returnCards = new ArrayList<>();
@@ -73,17 +80,34 @@ public class GameRoomService {
         ((List<Integer>) this.getPlayer(gameRoom, playerId).get("cards")).removeAll(cards);
     }
 
-    public void takeMoney(String gameRoomId, String playerId, int amount) {
+    public void takeCoins(String gameRoomId, String playerId, Integer amount) {
         Map<String, Object> gameRoom = this.gameRooms.get(gameRoomId);
         Integer playerCoins = ((Integer) this.getPlayer(gameRoom, playerId).get("coins"));
         playerCoins += amount;
         this.getPlayer(gameRoom, playerId).put("coins", playerCoins);
     }
 
-    public void depositMoney(String gameRoomId, String playerId, int amount) {
+    public void depositCoins(String gameRoomId, String playerId, Integer amount) {
         Map<String, Object> gameRoom = this.gameRooms.get(gameRoomId);
         Integer playerCoins = ((Integer) this.getPlayer(gameRoom, playerId).get("coins"));
         playerCoins -= amount;
         this.getPlayer(gameRoom, playerId).put("coins", playerCoins);
+    }
+
+    public void stealCoins(String gameRoomId, String playerId, String targetPlayerId, Integer amount) {
+        this.takeCoins(gameRoomId, playerId, amount);
+        this.depositCoins(gameRoomId, targetPlayerId, amount);
+    }
+
+    public void loseLife(Map<String, Object> gameRoom, String playerId) {
+        Integer playerLives = ((Integer) this.getPlayer(gameRoom, playerId).get("lives"));
+        playerLives--;
+        this.getPlayer(gameRoom, playerId).put("lives", playerLives);
+    }
+
+    public void killPlayer(String gameRoomId, String playerId, String targetPlayerId, Integer killCost) {
+        Map<String, Object> gameRoom = this.gameRooms.get(gameRoomId);
+        this.depositCoins(gameRoomId, playerId, killCost);
+        this.loseLife(gameRoom, targetPlayerId);
     }
 }
