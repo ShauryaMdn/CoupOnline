@@ -56,7 +56,7 @@ public class GameRoomService {
         String playerId = RandomString.getRandomString();
         playerMap.put(playerId, this.initializePlayerAttributes(playerName));
         this.takeCoins(gameRoomId, playerId, 2);
-        this.takeCards(gameRoomId, playerId, 2);
+        this.drawCards(gameRoomId, playerId, 2);
         return playerId;
     }
 
@@ -66,7 +66,7 @@ public class GameRoomService {
     }
 
     @SuppressWarnings("unchecked")
-    public void takeCards(String gameRoomId, String playerId, Integer numCards) {
+    public void drawCards(String gameRoomId, String playerId, Integer numCards) {
         Map<String, Object> gameRoom = this.gameRooms.get(gameRoomId);
         List<Integer> cardDeck = (List<Integer>) gameRoom.get("cardDeck");
         List<Integer> returnCards = new ArrayList<>();
@@ -84,7 +84,11 @@ public class GameRoomService {
         cardDeck.addAll(cards);
         Collections.shuffle(cardDeck);
 
-        ((List<Integer>) this.getPlayer(gameRoom, playerId).get("liveCards")).removeAll(cards);
+        // Doing it this way because if the player has duplicate cards removeAll removes all of them
+        List<Integer> playerCards = ((List<Integer>) this.getPlayer(gameRoom, playerId).get("liveCards"));
+        for (Integer card : cards) {
+            playerCards.remove(card);
+        }
     }
 
     public void takeCoins(String gameRoomId, String playerId, Integer amount) {
@@ -101,20 +105,13 @@ public class GameRoomService {
         this.getPlayer(gameRoom, playerId).put("coins", playerCoins);
     }
 
-    public void stealCoins(String gameRoomId, String playerId, String targetPlayerId, Integer amount) {
-        this.takeCoins(gameRoomId, playerId, amount);
-        this.depositCoins(gameRoomId, targetPlayerId, amount);
-    }
-
-    public void loseLife(Map<String, Object> gameRoom, String playerId) {
-        Integer playerLives = ((Integer) this.getPlayer(gameRoom, playerId).get("lives"));
+    @SuppressWarnings("unchecked")
+    public void loseLife(String gameRoomId, String playerId, Integer card) {
+        Map<String, Object> player = this.getPlayer(this.gameRooms.get(gameRoomId), playerId);
+        Integer playerLives = ((Integer) player.get("lives"));
         playerLives--;
-        this.getPlayer(gameRoom, playerId).put("lives", playerLives);
-    }
-
-    public void killPlayer(String gameRoomId, String playerId, String targetPlayerId, Integer killCost) {
-        Map<String, Object> gameRoom = this.gameRooms.get(gameRoomId);
-        this.depositCoins(gameRoomId, playerId, killCost);
-        this.loseLife(gameRoom, targetPlayerId);
+        player.put("lives", playerLives);
+        ((List<Integer>) player.get("liveCards")).remove(card);
+        ((List<Integer>) player.get("deadCards")).add(card);
     }
 }

@@ -30,6 +30,6 @@ public class GameSetupController {
     @MessageMapping("/join/{gameRoomId}")
     public void joinRoom(@DestinationVariable String gameRoomId, @Payload String playerName, Principal user) {
         this.messagingTemplate.convertAndSendToUser(user.getName(), "/topic/joinedRoom", this.gameRoomService.addPlayer(gameRoomId, playerName));
-        this.messagingTemplate.convertAndSend(String.format("/topic/joinedRoom/%s", this.gameRoomService.getPlayerMap(gameRoomId)));;
+        this.messagingTemplate.convertAndSend(String.format("/topic/playerMap/%s", gameRoomId), this.gameRoomService.getPlayerMap(gameRoomId));;
     }
 }
