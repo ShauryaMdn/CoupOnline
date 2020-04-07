@@ -6,20 +6,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class GameRoomService {
-    Map<String, Map<String, Object>> gameRooms;
+    Map<String, ConcurrentMap<String, Object>> gameRooms;
 
     @Autowired
     public GameRoomService() {
         this.gameRooms = new HashMap<>();
     }
 
+    public ConcurrentMap<String, Object> getGameRoom(String gameRoomId) {
+        return this.gameRooms.get(gameRoomId);
+    }
+
     public CreateGameResponse createGameRoom(String playerName) {
         String gameRoomId = RandomString.getRandomString();
-        Map<String, Object> gameInfoMap= new HashMap<>();
+        ConcurrentMap<String, Object> gameInfoMap = new ConcurrentHashMap<>();
         gameInfoMap.put("cardDeck", this.newCardDeck());
+        gameInfoMap.put("calloutLock", true);
         gameInfoMap.put("players", new HashMap<String, Map<String, Object>>());
         this.gameRooms.put(gameRoomId, gameInfoMap);
         return new CreateGameResponse(gameRoomId, this.addPlayer(gameRoomId, playerName), this.getPlayerMap(gameRoomId));

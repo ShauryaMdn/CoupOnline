@@ -28,7 +28,7 @@ public class PlayerSateController {
         this.messagingTemplate.convertAndSend(String.format("/topic/playerMap/%s", gameRoomId), this.gameRoomService.getPlayerMap(gameRoomId));
     }
 
-    @MessageMapping("cards/return/{gameRoomId}/{playerId}")
+    @MessageMapping("/cards/return/{gameRoomId}/{playerId}")
     public void returnCards(@DestinationVariable String gameRoomId, @DestinationVariable String playerId, @Payload List<Integer> returnedCards) {
         this.gameRoomService.returnCards(gameRoomId, playerId, returnedCards);
         this.messagingTemplate.convertAndSend(String.format("/topic/playerMap/%s", gameRoomId), this.gameRoomService.getPlayerMap(gameRoomId));
@@ -40,13 +40,13 @@ public class PlayerSateController {
         this.messagingTemplate.convertAndSend(String.format("/topic/playerMap/%s", gameRoomId), this.gameRoomService.getPlayerMap(gameRoomId));
     }
 
-    @MessageMapping("coins/deposit/{gameRoomId}/{playerId}")
+    @MessageMapping("/coins/deposit/{gameRoomId}/{playerId}")
     public void depositCoins(@DestinationVariable String gameRoomId, @DestinationVariable String playerId, @Payload Integer amount) {
         this.gameRoomService.depositCoins(gameRoomId, playerId, amount);
         this.messagingTemplate.convertAndSend(String.format("/topic/playerMap/%s", gameRoomId), this.gameRoomService.getPlayerMap(gameRoomId));
     }
 
-    @MessageMapping("loseLife/{gameRoomId}/{playerId}")
+    @MessageMapping("/loseLife/{gameRoomId}/{playerId}")
     public void loseLife(@DestinationVariable String gameRoomId, @DestinationVariable String playerId, @Payload Integer card) {
         this.gameRoomService.loseLife(gameRoomId, playerId, card);
         this.messagingTemplate.convertAndSend(String.format("/topic/playerMap/%s", gameRoomId), this.gameRoomService.getPlayerMap(gameRoomId));
