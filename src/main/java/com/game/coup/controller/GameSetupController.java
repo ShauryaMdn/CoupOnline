@@ -1,5 +1,6 @@
 package com.game.coup.controller;
 
+import com.game.coup.models.CreateGameResponse;
 import com.game.coup.service.GameRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -24,7 +25,8 @@ public class GameSetupController {
 
     @MessageMapping("/create")
     public void createRoom(@Payload String playerName, Principal user) {
-        this.messagingTemplate.convertAndSendToUser(user.getName(), "/topic/createdRoom", this.gameRoomService.createGameRoom(playerName));
+        this.messagingTemplate.convertAndSendToUser(user.getName(), "/topic/createdRoom", 
+            this.gameRoomService.createGameRoom(playerName));
     }
 
     @MessageMapping("/join/{gameRoomId}")

@@ -13,7 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/coup")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("*")
                 .setHandshakeHandler(new HandshakeHandler())
                 .withSockJS();
     }
